@@ -2,7 +2,7 @@ import json
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from . import forms
 import time
@@ -78,6 +78,22 @@ def posts(request):
         })
 
     return JsonResponse({"posts": data}, safe=False)
+
+def profile(request):
+    user = request.user
+    posts = Post.objects.filter(author=user).order_by('-timestamp')
+    return render(request, 'network/profile.html', {
+        "user": user,
+        "posts": posts,
+    })
+
+def user_profile(request, username):
+    user = get_object_or_404(User, username=username)
+    posts = Post.objects.filter(author=user).order_by('timestamp')
+    return render(request, 'network/profile.html', {
+        "user": user,
+        "posts": posts,
+    })
 
 def login_view(request):
     if request.method == "POST":
