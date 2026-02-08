@@ -9,6 +9,7 @@
         <script src="{% static 'network/profile.js'%}"></script>
     </head>
     <body>
+        {% csrf_token %}
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand" href="{% url 'index' %}">Network</a>
           
@@ -55,15 +56,15 @@
 
                         <div class="follow-stats d-flex">
                             <div class="followers mr-3">
-                                <span class="count">{{ user.followers.count }}</span> followers
+                                <span class="followers-count count">{{ user.followers.count }}</span> followers
                             </div>
                             <div class="following">
-                                <span class="count">{{ user.following.count }}</span> followings
+                                <span class="followings-count count">{{ user.following.count }}</span> followings
                             </div>
                         </div>
 
                         {% if request.user.is_authenticated and request.user != user %}
-                        <button id="follow-btn" class="btn btn-primary mt-2" data-user-id="{{ user.id }}">
+                        <button id="follow-btn" class="btn btn-primary mt-2" data-username="{{ user.username }}" data-following="{% if is_followed %}true{% else %}false{% endif %}">
                             {% if request.user in user.followers.all %}
                                 Unfollow
                             {% else %}

@@ -49,7 +49,7 @@ function add_post(post) {
     post_card.className = 'card post-card mb-3';
     post_card.innerHTML = `
         <div class="card-body">
-            <h6 class="card-subtitle mb-2 post-author">${post.author} • ${post.timestamp}</h6>
+            <h6 class="card-subtitle mb-2 post-author"><a href="/profile/${post.author}"> ${post.author} </a> • ${post.timestamp}</h6>
             <p class="card-text">${post.content}</p>
             <div class="post-actions">
                 <span class="likes ${post.liked_by_me ? 'liked' : ''}" data-post-id="${post.id}" data-liked="${post.liked_by_me}">❤️ <span class="likes-count">${post.likes_count}</span></span>

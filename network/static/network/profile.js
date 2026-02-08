@@ -21,6 +21,7 @@ const csrftoken = getCookie('csrftoken');
 
 document.addEventListener('DOMContentLoaded', () => {
     load();
+    document.querySelector('#follow-btn').addEventListener('click', follow);
 });
 
 window.onscroll = () => {
@@ -95,3 +96,32 @@ function add_post(post) {
 
 };
 
+function follow() {
+
+    const username = this.dataset.username;
+    const followNow = this.dataset.following === 'true';
+    const newFollowState = !followNow
+
+    fetch(`/profile/${username}/follow/`, {
+        method: 'PUT',
+        headers: {
+            'Content-type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            subscribed: newFollowState
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        this.dataset.following = data.subscribed ? 'true' : 'false';
+        this.closest('.profile-header').querySelector('.followers-count').textContent = data.followers_count;
+
+        if (data.subscribed) {
+            this.textContent = 'Unfollow';
+        } else {
+            this.textContent = 'Follow';
+        };
+    });
+
+};

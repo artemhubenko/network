@@ -89,15 +89,40 @@ def profile(request):
     posts = Post.objects.filter(author=user).order_by('-timestamp')
     return render(request, 'network/profile.html', {
         "user": user,
-        "posts": posts,
     })
 
 def user_profile(request, username):
     user = get_object_or_404(User, username=username)
-    posts = Post.objects.filter(author=user).order_by('timestamp')
+    is_followed = request.user.following.filter(id=user.id).exists()
     return render(request, 'network/profile.html', {
         "user": user,
-        "posts": posts,
+        "is_followed": is_followed,
+    })
+
+def follow(request, username):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Auth required"}, status=401)
+    fetch_user = request.user
+    try: 
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found."}, status=404) 
+    
+    user_id = user.id
+
+    if request.method != "PUT": 
+        return JsonResponse({"error": "PUT request is required."}, status=400)
+
+    if fetch_user.following.filter(id=user_id).exists():
+        fetch_user.following.remove(user)
+        subscribed = False
+    else:
+        fetch_user.following.add(user)
+        subscribed = True
+
+    return JsonResponse({
+        "followers_count": user.followers.count(),
+        "subscribed": subscribed,
     })
 
 def login_view(request):

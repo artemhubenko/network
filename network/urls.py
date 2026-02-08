@@ -6,6 +6,7 @@ from . import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("<int:post_id>/like/", views.like_post, name="like_post"),
+    path("profile/<str:username>/follow/", views.follow, name="follow"),
     path("profile", views.profile, name="profile"),
     path("profile/<str:username>/", views.user_profile, name="profile_user"),
 
