@@ -1,0 +1,121 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+<script src="{% static 'network/index.js'%}"></script>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+
+        <!-- Central column -->
+        <div class="col-md-6">
+
+            <!-- New post form -->
+            {% if user.is_authenticated %}
+            <div class="card new-post-card mb-4">
+                <div class="card-body">
+                    <form method="post" action="{% url 'index' %}" id="new-post-form">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-post btn-block">Post</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Feed -->
+            <div id="posts-feed">
+            </div>
+            <p class="text-center text-muted">These are all posts for now.</p>
+        </div>
+
+    </div>
+</div>
+<style>
+body {
+    background: #0b0f18;
+    color: #c9d1d9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Навигация */
+.navbar {
+    background-color: #0d1117 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+.navbar-brand {
+    color: #58a6ff !important;
+    font-weight: bold;
+}
+.nav-link {
+    color: #8b949e !important;
+    margin-right: 15px;
+    transition: color 0.2s;
+}
+.nav-link:hover {
+    color: #58a6ff !important;
+}
+
+/* Форма нового поста */
+.new-post-card {
+    background: linear-gradient(135deg, #161b22, #0d1117);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    padding: 15px;
+}
+.new-post-card textarea {
+    background-color: #0b0f18;
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    resize: vertical;
+    font-size: 1rem;
+    height: 100px;
+}
+.btn-post {
+    background-color: #238636;
+    border-color: #238636;
+    font-weight: bold;
+}
+.btn-post:hover {
+    background-color: #2ea043;
+    border-color: #2ea043;
+}
+
+/* Посты */
+.post-card {
+    background: linear-gradient(135deg, #161b22, #0d1117);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+}
+.post-author {
+    color: #58a6ff;
+    font-weight: 600;
+}
+.post-actions {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #8b949e;
+}
+.likes {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.likes:hover {
+    color: #f85149;
+}
+
+/* Прокрутка ленты */
+#posts-feed {
+    overflow-y: auto;
+}
+</style>
+
+{% endblock %}
