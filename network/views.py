@@ -59,7 +59,12 @@ def like_post(request, post_id):
 
 
 def posts(request):
-    postings = Post.objects.all().order_by('-timestamp')
+    username = request.GET.get("username")
+    if username:
+        postings = Post.objects.filter(author__username=username)
+    else:
+        postings = Post.objects.all()
+    postings = postings.order_by('-timestamp')
 
     offset = int(request.GET.get("offset") or 0)
     limit = int(request.GET.get("limit") or (offset + 9))

@@ -5,6 +5,66 @@ body {
     color: #c9d1d9;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+.navbar {
+    display: flex;
+    justify-content: flex-start; /* ← ВАЖНО */
+    align-items: center;
+    gap: 30px; /* расстояние между логотипом и меню */
+
+    padding: 12px 24px;
+    background: #0d1117;
+    border-bottom: 1px solid #21262d;
+}
+
+/* Лого */
+.navbar-brand {
+    font-size: 20px;
+    font-weight: bold;
+    color: #58a6ff;
+    text-decoration: none;
+}
+
+.navbar-brand:hover {
+    color: #79c0ff;
+}
+
+/* Контейнер ссылок */
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Один пункт */
+.nav-item {
+    display: flex;
+    align-items: center;
+}
+
+/* Ссылки */
+.nav-link {
+    color: #c9d1d9;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.nav-link:hover {
+    background: #161b22;
+    color: #ffffff;
+}
+
+/* Юзернейм */
+.nav-link strong {
+    color: #58a6ff;
+}
 /* Общий контейнер */
 .profile-page {
     max-width: 800px;

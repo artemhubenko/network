@@ -9,7 +9,38 @@
         <script src="{% static 'network/profile.js'%}"></script>
     </head>
     <body>
-        <div class="container profile-page">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="{% url 'index' %}">Network</a>
+          
+            <div>
+              <ul class="navbar-nav mr-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'profile' %}"><strong>{{ user.username }}</strong></a>
+                    </li>
+                {% endif %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'index' %}">All Posts</a>
+                </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Following</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">Register</a>
+                    </li>
+                {% endif %}
+              </ul>
+            </div>
+        </nav>
+        <div class="container profile-page" id="profile-page" data-profile="{{ user.username }}">
 
             
             <div class="profile-header card mb-4">
@@ -46,21 +77,6 @@
             </div>
 
             <div id="user-posts">
-                {% for post in posts %}
-                <div class="card post-card mb-3">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 post-author">{{ post.author.username }} • {{ post.timestamp|date:"Y-m-d H:i" }}</h6>
-                        <p class="card-text">{{ post.content }}</p>
-                        <div class="post-actions">
-                            <span class="likes {{ post.liked_by_me|yesno:'liked,' }}" data-post-id="{{ post.id }}" data-liked="{{ post.liked_by_me }}">
-                                ❤️ <span class="likes-count">{{ post.likes_count }}</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                {% empty %}
-                <p class="text-muted">This user doesn't have posts yet.</p>
-                {% endfor %}
             </div>
 
         </div>
