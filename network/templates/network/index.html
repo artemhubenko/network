@@ -103,6 +103,9 @@ body {
     margin-top: 10px;
     font-size: 0.9rem;
     color: #8b949e;
+    display: flex;
+    justify-content: space-between; /* элементы по краям */
+    align-items: center;
 }
 .likes {
     cursor: pointer;
@@ -116,6 +119,15 @@ body {
 #posts-feed {
     overflow-y: auto;
 }
+
+#following-link, #all-posts-link {
+    cursor: pointer;
+}
+
+.edit-btn {
+    margin-left: auto;
+}
+
 </style>
 
 {% endblock %}

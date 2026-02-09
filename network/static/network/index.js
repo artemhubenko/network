@@ -21,6 +21,13 @@ const csrftoken = getCookie('csrftoken');
 
 document.addEventListener('DOMContentLoaded', () => {
     load();
+    document.querySelector('#following-link').addEventListener('click', load_followings);
+    document.querySelector('#all-posts-link').addEventListener('click', () => {
+        document.querySelector('#posts-feed').innerHTML = '';
+        counter = 0;
+        document.querySelector('.new-post-card').style.display = 'flex';
+        load();
+    });
 });
 
 window.onscroll = () => {
@@ -43,19 +50,115 @@ function load() {
 
 };
 
+function load_followings() {
+
+    document.querySelector('#posts-feed').innerHTML = '';
+    counter = 0;
+
+    document.querySelector('.new-post-card').style.display = 'none';
+
+    const start = counter;
+    const end = start + quantity - 1;
+    counter = end + 1;
+
+    fetch(`/api/posts?offset=${start}&limit=${quantity}&filter=following`)
+    .then(res => res.json())
+    .then(data => {
+        data.posts.forEach(add_post);
+    })
+};
+
 function add_post(post) {
 
     const post_card = document.createElement('div');
     post_card.className = 'card post-card mb-3';
     post_card.innerHTML = `
         <div class="card-body">
-            <h6 class="card-subtitle mb-2 post-author"><a href="/profile/${post.author}"> ${post.author} </a> • ${post.timestamp}</h6>
-            <p class="card-text">${post.content}</p>
+            <div class="div-card-text">
+                <h6 class="card-subtitle mb-2 post-author"><a href="/profile/${post.author}"> ${post.author} </a> • ${post.timestamp}</h6>
+                <p class="card-text">${post.content}</p>
+            </div>
             <div class="post-actions">
                 <span class="likes ${post.liked_by_me ? 'liked' : ''}" data-post-id="${post.id}" data-liked="${post.liked_by_me}">❤️ <span class="likes-count">${post.likes_count}</span></span>
             </div>
         </div>
     `;
+
+    if (post.is_mine) {
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.className = 'edit-btn';
+        editBtn.dataset.postId = post.id;
+
+        post_card.querySelector('.post-actions').appendChild(editBtn);
+
+        editBtn.addEventListener('click', function() {
+            const postId = this.dataset.postId;
+ 
+            const cardText = post_card.querySelector(".div-card-text");
+            const originalText = cardText.querySelector(".card-text").textContent;
+            
+            const postActions = post_card.querySelector('.post-actions');
+            postActions.style.display = 'none';
+
+            const editContainer = document.createElement('div');
+            editContainer.className = 'edit-container';
+
+            const editField = document.createElement('textarea');
+            editField.className = 'edit-field';
+            editField.value = originalText;
+            editContainer.appendChild(editField);
+            
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'submit-edit-btn';
+            saveBtn.textContent = 'Save';
+            editContainer.appendChild(saveBtn);
+
+            cardText.innerHTML = '';
+            cardText.appendChild(editContainer);
+            
+            saveBtn.addEventListener('click', function() {
+                
+                const newContent = editField.value;
+
+                fetch(`/${postId}/edit/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    new_content: newContent
+                })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    cardText.innerHTML = `
+                    <h6 class="card-subtitle mb-2 post-author">
+                        <a href="/profile/${post.author}">${post.author}</a> • ${post.timestamp}
+                    </h6>
+                    <p class="card-text">${data.new_content}</p>
+                `;
+
+                    postActions.style.display = 'flex';
+                })
+                .catch(err => {
+                console.error("Error:", err);
+                cardText.innerHTML = `
+                    <h6 class="card-subtitle mb-2 post-author">
+                        <a href="/profile/${post.author}">${post.author}</a> • ${post.timestamp}
+                    </h6>
+                    <p class="card-text">${originalText}</p>
+                `;
+                postActions.style.display = 'flex';
+                });
+            });
+
+            
+
+            
+        });
+    }
 
     const likeEl = post_card.querySelector('.likes');
 
@@ -91,4 +194,3 @@ function add_post(post) {
     document.querySelector("#posts-feed").append(post_card);
 
 };
-

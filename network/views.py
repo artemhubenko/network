@@ -60,8 +60,11 @@ def like_post(request, post_id):
 
 def posts(request):
     username = request.GET.get("username")
+    filter = request.GET.get("filter")
     if username:
         postings = Post.objects.filter(author__username=username)
+    elif filter == 'following' and request.user.is_authenticated:
+        postings = Post.objects.filter(author__in=request.user.following.all())
     else:
         postings = Post.objects.all()
     postings = postings.order_by('-timestamp')
@@ -79,7 +82,8 @@ def posts(request):
             "content": chunk.content,
             "timestamp": localtime(chunk.timestamp).strftime("%Y-%m-%d %H:%M"),
             "likes_count": chunk.liked.count(),
-            "liked_by_me": chunk.liked.filter(id=request.user.id).exists()
+            "liked_by_me": chunk.liked.filter(id=request.user.id).exists(),
+            "is_mine": request.user == chunk.author,
         })
 
     return JsonResponse({"posts": data}, safe=False)
@@ -124,6 +128,29 @@ def follow(request, username):
         "followers_count": user.followers.count(),
         "subscribed": subscribed,
     })
+
+def edit(request, post_id):
+    try: 
+        post = Post.objects.get(pk=post_id)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post not found"}, status=404)
+
+    if request.user != post.author:
+        return JsonResponse({"error": "You are not allowed to edit this post"}, status=403)
+    
+    if request.method != "PUT": 
+        return JsonResponse({"error": "PUT request is required."}, status=400)
+    
+    data = json.loads(request.body)
+    new_content = data.get("new_content", "")
+    post.content = new_content
+    post.save()
+
+    return JsonResponse({
+        "new_content": post.content,
+    })
+    
+
 
 def login_view(request):
     if request.method == "POST":
