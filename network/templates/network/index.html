@@ -128,6 +128,70 @@ body {
     margin-left: auto;
 }
 
+.edit-btn {
+    margin-left: auto;              /* уезжает вправо */
+    background: transparent;
+    border: none;
+    color: #6c757d;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.edit-btn:hover {
+    color: #0d6efd;                  /* bootstrap primary */
+    text-decoration: underline;
+}
+
+.edit-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.edit-field {
+    width: 100%;
+    min-height: 80px;
+    resize: vertical;
+
+    padding: 8px 10px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+
+    outline: none;
+}
+
+.edit-field:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.15);
+}
+
+.submit-edit-btn {
+    align-self: flex-end;       /* вправо */
+    padding: 6px 14px;
+
+    background-color: #0d6efd;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.submit-edit-btn:hover {
+    background-color: #0b5ed7;
+}
+
+.submit-edit-btn:active {
+    transform: scale(0.97);
+}
+
+
 </style>
 
 {% endblock %}

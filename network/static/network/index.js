@@ -76,13 +76,14 @@ function add_post(post) {
         <div class="card-body">
             <div class="div-card-text">
                 <h6 class="card-subtitle mb-2 post-author"><a href="/profile/${post.author}"> ${post.author} </a> • ${post.timestamp}</h6>
-                <p class="card-text">${post.content}</p>
+                <p class="card-text"></p>
             </div>
             <div class="post-actions">
                 <span class="likes ${post.liked_by_me ? 'liked' : ''}" data-post-id="${post.id}" data-liked="${post.liked_by_me}">❤️ <span class="likes-count">${post.likes_count}</span></span>
             </div>
         </div>
     `;
+    post_card.querySelector('.card-text').textContent = post.content;
 
     if (post.is_mine) {
         const editBtn = document.createElement('button');
@@ -117,45 +118,41 @@ function add_post(post) {
             cardText.innerHTML = '';
             cardText.appendChild(editContainer);
             
-            saveBtn.addEventListener('click', function() {
-                
-                const newContent = editField.value;
-
-                fetch(`/${postId}/edit/`, {
-                method: 'PUT',
-                headers: {
-                    'Content-type': 'application/json',
-                    'X-CSRFToken': csrftoken
-                },
-                body: JSON.stringify({
-                    new_content: newContent
-                })
-                })
-                .then(res => res.json())
-                .then(data => {
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    editContainer.style.display = 'none';
+                    postActions.style.display = 'flex';
                     cardText.innerHTML = `
                     <h6 class="card-subtitle mb-2 post-author">
                         <a href="/profile/${post.author}">${post.author}</a> • ${post.timestamp}
                     </h6>
-                    <p class="card-text">${data.new_content}</p>
-                `;
+                    <p class="card-text"></p>
+                    `;
+                    cardText.querySelector('.card-text').textContent = originalText;
+                }
 
-                    postActions.style.display = 'flex';
-                })
-                .catch(err => {
-                console.error("Error:", err);
-                cardText.innerHTML = `
-                    <h6 class="card-subtitle mb-2 post-author">
-                        <a href="/profile/${post.author}">${post.author}</a> • ${post.timestamp}
-                    </h6>
-                    <p class="card-text">${originalText}</p>
-                `;
-                postActions.style.display = 'flex';
-                });
+                if(event.ctrlKey && event.key === 'Enter') {
+                    saveEditedPost({
+                    postId: post.id,
+                    newContent: editField.value,
+                    postCard: post_card,
+                    postActions: postActions,
+                    author: post.author,
+                    timestamp: post.timestamp
+                    });
+                }
             });
-
             
-
+            saveBtn.addEventListener('click', () => {
+                saveEditedPost({
+                    postId: post.id,
+                    newContent: editField.value,
+                    postCard: post_card,
+                    postActions: postActions,
+                    author: post.author,
+                    timestamp: post.timestamp
+                });   
+            });
             
         });
     }
@@ -194,3 +191,47 @@ function add_post(post) {
     document.querySelector("#posts-feed").append(post_card);
 
 };
+
+function saveEditedPost({
+    postId,
+    newContent,
+    postCard,
+    postActions,
+    author,
+    timestamp
+}) {
+
+    fetch(`/${postId}/edit/`, {
+    method: 'PUT',
+    headers: {
+        'Content-type': 'application/json',
+        'X-CSRFToken': csrftoken
+    },
+    body: JSON.stringify({
+        new_content: newContent
+    })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const cardText = postCard.querySelector('.div-card-text');
+
+        cardText.innerHTML = `
+        <h6 class="card-subtitle mb-2 post-author">
+            <a href="/profile/${author}">${author}</a> • ${timestamp}
+        </h6>
+        <p class="card-text"></p>
+    `;
+        cardText.querySelector('.card-text').textContent = data.new_content;
+        postActions.style.display = 'flex';
+    })
+    .catch(err => {
+    console.error("Error:", err);
+    cardText.innerHTML = `
+        <h6 class="card-subtitle mb-2 post-author">
+            <a href="/profile/${post.author}">${post.author}</a> • ${post.timestamp}
+        </h6>
+        <p class="card-text">${originalText}</p>
+    `;
+    postActions.style.display = 'flex';
+    });
+}

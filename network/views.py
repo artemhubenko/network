@@ -7,6 +7,7 @@ from django.urls import reverse
 from . import forms
 import time
 from django.utils.timezone import localtime 
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -30,6 +31,7 @@ def index(request):
         "form": form,
     })
 
+@login_required(login_url='/login')
 def like_post(request, post_id):
 
     if not request.user.is_authenticated:
@@ -70,7 +72,7 @@ def posts(request):
     postings = postings.order_by('-timestamp')
 
     offset = int(request.GET.get("offset") or 0)
-    limit = int(request.GET.get("limit") or (offset + 9))
+    limit = int(request.GET.get("limit", 10))
 
     chunks = postings[offset:offset + limit]
 
@@ -88,6 +90,7 @@ def posts(request):
 
     return JsonResponse({"posts": data}, safe=False)
 
+@login_required(login_url='/login')
 def profile(request):
     user = request.user
     posts = Post.objects.filter(author=user).order_by('-timestamp')
@@ -97,7 +100,10 @@ def profile(request):
 
 def user_profile(request, username):
     user = get_object_or_404(User, username=username)
-    is_followed = request.user.following.filter(id=user.id).exists()
+    if request.user.is_authenticated:
+        is_followed = request.user.following.filter(id=user.id).exists()
+    else: 
+        is_followed = False
     return render(request, 'network/profile.html', {
         "user": user,
         "is_followed": is_followed,
@@ -117,6 +123,9 @@ def follow(request, username):
     if request.method != "PUT": 
         return JsonResponse({"error": "PUT request is required."}, status=400)
 
+    if request.user == user: 
+        return JsonResponse({"error": "You cannot follow yourself."}, status=400)
+    
     if fetch_user.following.filter(id=user_id).exists():
         fetch_user.following.remove(user)
         subscribed = False
@@ -143,6 +152,10 @@ def edit(request, post_id):
     
     data = json.loads(request.body)
     new_content = data.get("new_content", "")
+    
+    if not new_content.strip():
+        return JsonResponse({"error": "Empty string."}, status=400)
+    
     post.content = new_content
     post.save()
 
